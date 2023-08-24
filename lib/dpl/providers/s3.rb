@@ -24,6 +24,7 @@ module Dpl
 
       opt '--access_key_id ID', 'AWS access key id', required: true, secret: true
       opt '--secret_access_key KEY', 'AWS secret key', required: true, secret: true
+      opt '--session_token TOKEN', 'AWS Session Token', required: false, secret: true
       opt '--bucket BUCKET', 'S3 bucket', required: true
       opt '--region REGION', 'S3 region', default: 'us-east-1'
       opt '--endpoint URL', 'S3 endpoint'
@@ -45,6 +46,7 @@ module Dpl
       opt '--verbose', 'Be verbose about uploading files'
 
       msgs login:                 'Using Access Key: %{access_key_id}',
+           login_token:           'Using Access Key: %{access_key_id}, Session Token: %{session_token}',
            default_uri_schema:    'S3 endpoint does not specify a scheme; defaulting to https',
            access_denied:         'It looks like you tried to write to a bucket that is not yours or does not exist. Please create the bucket before trying to write to it.',
            checksum_error:        'AWS secret key does not match the access key id',
@@ -64,7 +66,8 @@ module Dpl
       end
 
       def login
-        info :login
+        info(session_token ? :login_token : :login)
+        
       end
 
       def deploy
@@ -200,7 +203,7 @@ module Dpl
         end
 
         def credentials
-          Aws::Credentials.new(access_key_id, secret_access_key)
+          Aws::Credentials.new(access_key_id, secret_access_key, session_token)
         end
 
         def to_pairs(hash)
