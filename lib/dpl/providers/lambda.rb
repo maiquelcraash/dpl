@@ -24,6 +24,7 @@ module Dpl
 
       opt '--access_key_id ID',       'AWS access key id', required: true, secret: true
       opt '--secret_access_key KEY',  'AWS secret key', required: true, secret: true
+      opt '--session_token TOKEN',    'AWS Session Token', required: false, secret: true
       opt '--region REGION',          'AWS region the Lambda function is running in', default: 'us-east-1'
       opt '--function_name FUNC',     'Name of the Lambda being created or updated', required: true
       opt '--role ROLE',              'ARN of the IAM role to assign to the Lambda function', note: 'required when creating a new function'
@@ -45,7 +46,8 @@ module Dpl
       opt '--zip PATH',               'Path to a packaged Lambda, a directory to package, or a single file to package', default: '.'
       opt '--dot_match',              'Include hidden .* files to the zipped archive'
 
-      msgs login: 'Using Access Key: %{access_key_id}',
+      msgs login:           'Using Access Key: %{access_key_id}',
+           login_token:     'Using Access Key: %{access_key_id}, Session Token: %{session_token}',
            create_function: 'Creating function %{function_name}.',
            update_config: 'Updating existing function %{function_name}.',
            update_tags: 'Updating tags.',
@@ -53,7 +55,7 @@ module Dpl
            description: 'Deploy build %{build_number} to AWS Lambda via Travis CI'
 
       def login
-        info :login
+        info(session_token ? :login_token : :login)
       end
 
       def deploy
@@ -173,9 +175,9 @@ module Dpl
         @client ||= Aws::Lambda::Client.new(region:, credentials:)
       end
 
-      def credentials
-        Aws::Credentials.new(access_key_id, secret_access_key)
-      end
+        def credentials
+          Aws::Credentials.new(access_key_id, secret_access_key, session_token)
+        end
 
       def split_vars(vars)
         vars.map { |var| var.split('=', 2) }.to_h
