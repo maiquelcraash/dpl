@@ -87,7 +87,7 @@ module Dpl
         client.wait_until(:function_updated, { function_name: })
         update_code
       rescue Aws::Waiters::Errors::WaiterFailed
-        error 'Update timed out.'
+        error "Update timed out.\n#{err.message}\n#{err.backtrace}"
       end
 
       def update_config
