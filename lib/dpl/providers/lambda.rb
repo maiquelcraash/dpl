@@ -85,8 +85,8 @@ module Dpl
             update_tags(arn) if function_tags?
             client.wait_until(:function_updated, { function_name: function_name })
             update_code
-          rescue Aws::Waiters::Errors::WaiterFailed
-            error 'Update timed out.'
+          rescue Aws::Waiters::Errors::WaiterFailed => err
+            error "Update timed out.\n#{err.message}\n#{err.backtrace}"
           end
         end
 
